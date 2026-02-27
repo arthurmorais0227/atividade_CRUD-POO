@@ -21,29 +21,47 @@ model Cliente {
 
   ativo       Boolean   @default(true)
 
-  pedidos     Pedido[]  
+  pedidos     Pedido[]
 
   @@map("clientes")
 }
 
 model Pedido {
-  id          Int       @id @default(autoincrement())
+  id          Int           @id @default(autoincrement())
   clienteId   Int
-  cliente     Cliente   @relation(fields: [clienteId], references: [id])
+  cliente     Cliente       @relation(fields: [clienteId], references: [id])
 
-  criadoEm    DateTime  @default(now())
-  status      String
+  total       Decimal       @db.Decimal(10, 2)
+  status      StatusPedido
+  criadoEm    DateTime      @default(now())
+
+  itens       ItemPedido[]
 
   @@map("pedidos")
 }
 
+model ItemPedido {
+  id            Int       @id @default(autoincrement())
+  pedidoId      Int
+  produtoId     Int
+  quantidade    Int
+  precoUnitario Decimal   @db.Decimal(10, 2)
+
+  pedido        Pedido    @relation(fields: [pedidoId], references: [id])
+  produto       Produto   @relation(fields: [produtoId], references: [id])
+
+  @@map("itens_pedido")
+}
+
 model Produto {
-  id          Int        @id @default(autoincrement())
+  id          Int          @id @default(autoincrement())
   nome        String
   descricao   String
   categoria   Categoria
-  preco       Decimal    @db.Decimal(10, 2)
-  disponivel  Boolean    @default(true)
+  preco       Decimal      @db.Decimal(10, 2)
+  disponivel  Boolean      @default(true)
+
+  itens       ItemPedido[]
 
   @@map("produtos")
 }
@@ -53,4 +71,10 @@ enum Categoria {
   BEBIDA
   SOBREMESA
   COMBO
+}
+
+enum StatusPedido {
+  ABERTO
+  PAGO
+  CANCELADO
 }
