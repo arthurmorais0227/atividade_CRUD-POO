@@ -1,7 +1,7 @@
 {
   "name": "atividad_CRUD",
   "version": "1.0.0",
-  "description": "",
+  "description": "Atividade de CRUD utilizando POO",
   "main": "server.js",
   "type": "module",
   "private": true,
@@ -9,7 +9,7 @@
     "dev": "cls && nodemon src/server.js"
   },
   "keywords": [],
-  "author": "",
+  "author": "Arthur Morais",
   "license": "MIT",
   "dependencies": {
     "@prisma/adapter-pg": "^7.3.0",
