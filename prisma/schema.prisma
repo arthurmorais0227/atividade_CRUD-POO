@@ -1,16 +1,56 @@
 generator client {
-    provider = "prisma-client-js"
+  provider = "prisma-client-js"
 }
 
 datasource db {
-    provider = "postgresql"
+  provider = "postgresql"
 }
 
-model Exemplo {
-    id        Int      @id @default(autoincrement())
-    nome      String?
-    estado   Boolean  @default(true)
-    preco     Decimal  @db.Decimal(10, 2)
+model Cliente {
+  id          Int       @id @default(autoincrement())
+  nome        String
+  telefone    String    @unique
+  email       String    @unique
+  cpf         String    @unique
+  cep         String    @db.Char(8)
 
-    @@map("exemplo")
+  logradouro  String?
+  bairro      String?
+  localidade  String?
+  uf          String?   @db.Char(2)
+
+  ativo       Boolean   @default(true)
+
+  pedidos     Pedido[]  
+
+  @@map("clientes")
+}
+
+model Pedido {
+  id          Int       @id @default(autoincrement())
+  clienteId   Int
+  cliente     Cliente   @relation(fields: [clienteId], references: [id])
+
+  criadoEm    DateTime  @default(now())
+  status      String
+
+  @@map("pedidos")
+}
+
+model Produto {
+  id          Int        @id @default(autoincrement())
+  nome        String
+  descricao   String
+  categoria   Categoria
+  preco       Decimal    @db.Decimal(10, 2)
+  disponivel  Boolean    @default(true)
+
+  @@map("produtos")
+}
+
+enum Categoria {
+  LANCHE
+  BEBIDA
+  SOBREMESA
+  COMBO
 }
