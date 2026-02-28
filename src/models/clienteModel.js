@@ -1,4 +1,5 @@
 import prisma from "../utils/prismaClient.js";
+import PedidoModel from "./pedidoModel.js";
 
 export default class ClienteModel {
   constructor({
@@ -185,12 +186,31 @@ export default class ClienteModel {
       where.ativo = filtros.ativo === "true" || filtros.ativo === true;
     }
 
-    return prisma.cliente.findMany({ where });
+
+    //sou eu que to escrevendo thiago/marcelo, 28/02 09:23  - só pra exibir os pedidos de cada cliente
+    // agora traz também os itens de cada pedido 
+    const results = await prisma.cliente.findMany({
+      where,
+      include: { pedidos: { include: { itens: { include: { produto: true } } } } },
+    });
+
+    return results.map((data) =>
+      new ClienteModel({
+        ...data,
+        pedidos: data.pedidos.map((p) => new PedidoModel(p)),
+      })
+    );
   }
 
   static async buscarPorId(id) {
-    const data = await prisma.cliente.findUnique({ where: { id } });
+    const data = await prisma.cliente.findUnique({
+      where: { id },
+      include: { pedidos: { include: { itens: { include: { produto: true } } } } },
+    });
     if (!data) return null;
-    return new ClienteModel(data);
+    return new ClienteModel({
+      ...data,
+      pedidos: data.pedidos.map((p) => new PedidoModel(p)),
+    });
   }
 }
