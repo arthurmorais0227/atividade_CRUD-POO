@@ -168,3 +168,4 @@ export const deletar = async (req, res) => {
     return res.status(500).json({ error: "Erro ao deletar registro." });
   }
 };
+S
