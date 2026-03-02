@@ -3,10 +3,10 @@ import * as controller from '../controllers/produtosController.js';
 
 const router = express.Router();
 
-router.post('/', controller.criar);
-router.get('/', controller.buscarTodos);
-router.get('/:id', controller.buscarPorId);
-router.put('/:id', controller.atualizar);
-router.delete('/:id', controller.deletar);
+router.post('/produtos', controller.criar);
+router.get('/produtos', controller.buscarTodos);
+router.get('/produtos/:id', controller.buscarPorId);
+router.put('/produtos/:id', controller.atualizar);
+router.delete('/produtos/:id', controller.deletar);
 
 export default router;
