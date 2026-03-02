@@ -4,7 +4,7 @@ import PedidoModel from "./pedidoModel.js";
 export default class ClienteModel {
   constructor({
     id = null,
-    nome = null,
+    nome,
     telefone = null,
     email = null,
     cpf = null,
@@ -188,7 +188,7 @@ export default class ClienteModel {
 
 
     //sou eu que to escrevendo thiago/marcelo, 28/02 09:23  - só pra exibir os pedidos de cada cliente
-    // agora traz também os itens de cada pedido 
+    // agora traz também os itens de cada pedido
     const results = await prisma.cliente.findMany({
       where,
       include: { pedidos: { include: { itens: { include: { produto: true } } } } },

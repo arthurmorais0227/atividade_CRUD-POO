@@ -30,7 +30,7 @@ export const criar = async (req, res) => {
       status,
       itens
     });
-    
+
     const data = await pedido.criar();
 
     res.status(201).json({ message: "Registro criado com sucesso!", data });
