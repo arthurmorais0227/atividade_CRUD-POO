@@ -122,19 +122,24 @@ async function main() {
     console.log('📦 Inserindo Pedidos e Itens...');
     // Criando 5 pedidos relacionados aos clientes e produtos criados acima
     for (let i = 0; i < 5; i++) {
+        // Calcular o total com base nos itens
+        const itens = [
+            {
+                produtoId: produtos[i].id,
+                quantidade: 3,
+                precoUnitario: produtos[i].preco,
+            },
+        ];
+
+        const total = itens.reduce((acc, item) => acc + item.precoUnitario * item.quantidade, 0);
+
         await prisma.pedido.create({
             data: {
                 clienteId: clientes[i].id,
-                total: 50.0 + i * 10,
+                total, // Agora o total é calculado
                 status: 'PAGO',
                 itens: {
-                    create: [
-                        {
-                            produtoId: produtos[i].id,
-                            quantidade: 1,
-                            precoUnitario: produtos[i].preco,
-                        },
-                    ],
+                    create: itens,
                 },
             },
         });
