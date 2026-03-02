@@ -2,19 +2,42 @@ import clienteModel from '../models/clienteModel.js';
 
 const buscarEnderecoPorCep = async (cep) => {
     try {
-        const response = await fetch(`https://viacep.com.br/ws/${cep}/json/`);
-        const data = await response.json();
+        let response = await fetch(`https://viacep.com.br/ws/${cep}/json/`);
+        
+        if (response.ok) {
+            const data = await response.json();
+            if (!data.erro) {
+                return {
+                    logradouro: data.logradouro,
+                    bairro: data.bairro,
+                    localidade: data.localidade,
+                    uf: data.uf
+                };
+            }
+        }
+        //fui testar em casa e aparentemente essa api viaCep esta fora de ar, ent coloquei uma reserva
+        response = await fetch(`https://brasilapi.com.br/api/cep/v1/${cep}`);
 
-        if (data.erro) return null;
+        if (response.ok) {
+            const data = await response.json();
+            return {
+                logradouro: data.street,
+                bairro: data.neighborhood,
+                localidade: data.city,
+                uf: data.state
+            };
+        }
 
-        return data;
+        return null;
+
     } catch (error) {
-        console.error('Erro ao buscar CEP:', error);
         return null;
     }
 };
 
 export const criar = async (req, res) => {
+
+
     try {
         if (!req.body) {
             return res.status(400).json({ error: 'Corpo da requisição vazio. Envie os dados!' });
