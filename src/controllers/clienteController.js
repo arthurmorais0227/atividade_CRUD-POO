@@ -30,10 +30,12 @@ export const criar = async (req, res) => {
 
         const endereco = await buscarEnderecoPorCep(cep);
 
-        if (!endereco) {
-            return res.status(400).json({ error: 'CEP inválido.' });
-        }
 
+
+        if (!endereco) {
+            return res.status(400).json({ error: 'CEP deve ter 8 dígitos numéricos!' });
+        }
+            
         const cliente = new clienteModel({
             nome,
             telefone,
