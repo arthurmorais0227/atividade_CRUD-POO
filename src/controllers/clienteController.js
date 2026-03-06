@@ -1,43 +1,7 @@
 import clienteModel from '../models/clienteModel.js';
-
-const buscarEnderecoPorCep = async (cep) => {
-    try {
-        let response = await fetch(`https://viacep.com.br/ws/${cep}/json/`);
-        
-        if (response.ok) {
-            const data = await response.json();
-            if (!data.erro) {
-                return {
-                    logradouro: data.logradouro,
-                    bairro: data.bairro,
-                    localidade: data.localidade,
-                    uf: data.uf
-                };
-            }
-        }
-        //fui testar em casa e aparentemente essa api viaCep esta fora de ar, ent coloquei uma reserva
-        response = await fetch(`https://brasilapi.com.br/api/cep/v1/${cep}`);
-
-        if (response.ok) {
-            const data = await response.json();
-            return {
-                logradouro: data.street,
-                bairro: data.neighborhood,
-                localidade: data.city,
-                uf: data.state
-            };
-        }
-
-        return null;
-
-    } catch (error) {
-        return null;
-    }
-};
+import { buscarEnderecoPorCep } from '../utils/cep.js';
 
 export const criar = async (req, res) => {
-
-
     try {
         if (!req.body) {
             return res.status(400).json({ error: 'Corpo da requisição vazio. Envie os dados!' });
@@ -53,12 +17,10 @@ export const criar = async (req, res) => {
 
         const endereco = await buscarEnderecoPorCep(cep);
 
-
-
         if (!endereco) {
             return res.status(400).json({ error: 'CEP deve ter 8 dígitos numéricos!' });
         }
-            
+
         const cliente = new clienteModel({
             nome,
             telefone,
@@ -73,11 +35,8 @@ export const criar = async (req, res) => {
 
         const data = await cliente.criar();
 
-        // o model retorna um objeto de erro nos casos de validação/uniqueness
-        // (por exemplo e-mail já cadastrado). se isso acontecer precisamos
-        // repassar o código apropriado em vez de sempre responder 201.
         if (data && data.error) {
-            // o próprio método define o status que deve ser usado
+            
             return res.status(data.status || 400).json({ error: data.error });
         }
 
