@@ -1,43 +1,8 @@
 import clienteModel from '../models/clienteModel.js';
-
-const buscarEnderecoPorCep = async (cep) => {
-    try {
-        let response = await fetch(`https://viacep.com.br/ws/${cep}/json/`);
-        
-        if (response.ok) {
-            const data = await response.json();
-            if (!data.erro) {
-                return {
-                    logradouro: data.logradouro,
-                    bairro: data.bairro,
-                    localidade: data.localidade,
-                    uf: data.uf
-                };
-            }
-        }
-        //fui testar em casa e aparentemente essa api viaCep esta fora de ar, ent coloquei uma reserva
-        response = await fetch(`https://brasilapi.com.br/api/cep/v1/${cep}`);
-
-        if (response.ok) {
-            const data = await response.json();
-            return {
-                logradouro: data.street,
-                bairro: data.neighborhood,
-                localidade: data.city,
-                uf: data.state
-            };
-        }
-
-        return null;
-
-    } catch (error) {
-        return null;
-    }
-};
+import { obterClima } from '../utils/clima.js';
+import { buscarEnderecoPorCep } from '../utils/cep.js';
 
 export const criar = async (req, res) => {
-
-
     try {
         if (!req.body) {
             return res.status(400).json({ error: 'Corpo da requisição vazio. Envie os dados!' });
@@ -53,12 +18,10 @@ export const criar = async (req, res) => {
 
         const endereco = await buscarEnderecoPorCep(cep);
 
-
-
         if (!endereco) {
             return res.status(400).json({ error: 'CEP deve ter 8 dígitos numéricos!' });
         }
-            
+
         const cliente = new clienteModel({
             nome,
             telefone,
@@ -202,5 +165,55 @@ export const deletar = async (req, res) => {
     } catch (error) {
         console.error('Erro ao deletar:', error);
         return res.status(500).json({ error: 'Erro ao deletar registro.' });
+    }
+};
+
+export const obterClimaCliente = async (req, res) => {
+    try {
+        const { id } = req.params;
+
+        if (isNaN(id)) {
+            return res.status(400).json({ error: 'O ID enviado não é um número válido.' });
+        }
+
+        const cliente = await clienteModel.buscarPorId(parseInt(id));
+
+        if (!cliente) {
+            return res.status(404).json({ error: 'Registro não encontrado.' });
+        }
+
+        if (!cliente.cep) {
+            return res.status(400).json({ error: 'Cliente não possui CEP cadastrado.' });
+        }
+        
+        let clima = null;
+        try {
+            clima = await obterClima(cliente.cep);
+        } catch (err) {
+
+            if (err.message === 'CEP_INVALIDO') {
+                return res.status(400).json({ error: 'CEP inválido.' });
+            }
+            clima = null;
+        }
+
+        const resposta = {
+            cliente_id: cliente.id,
+            cliente_nome: cliente.nome,
+            clima: clima
+                ? {
+                      temperatura: clima.temperatura,
+                      chove: clima.chove,
+                      quente: clima.quente,
+                      sugestao: clima.sugestao,
+                      cidade: clima.cidade,
+                      descricao: clima.descricao,
+                  }
+                : null,
+        };
+        return res.status(200).json({ data: resposta });
+    } catch (error) {
+        console.error('Erro ao obter clima:', error);
+        res.status(500).json({ error: 'Erro ao obter clima do cliente.' });
     }
 };
