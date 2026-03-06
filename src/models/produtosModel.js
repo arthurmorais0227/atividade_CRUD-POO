@@ -19,21 +19,20 @@ export default class ProdutoModel {
     }
 
     async criar() {
-
         if (!this.nome || this.nome.length < 3) {
-            throw new Error('Nome do produto deve ter no mínimo 3 caracteres.');
+            return { status: 400, error: 'Nome do produto deve ter no mínimo 3 caracteres.' };
         }
 
-          if (this.descricao && this.descricao.length > 255) {
-              throw new Error('Descrição deve ter no máximo 255 caracteres.');
+        if (this.descricao && this.descricao.length > 255) {
+            return { status: 400, error: 'Descrição deve ter no máximo 255 caracteres.' };
         }
 
-         if (!this.preco || this.preco <= 0) {
-             throw new Error('Preço deve ser maior que 0.');
+        if (!this.preco || this.preco <= 0) {
+            return { status: 400, error: 'Preço deve ser maior que 0.' };
         }
 
         if (!/^\d+(\.\d{1,2})?$/.test(this.preco.toString())) {
-            throw new Error('Preço deve ter no máximo 2 casas decimais.');
+            return { status: 400, error: 'Preço deve ter no máximo 2 casas decimais.' };
         }
 
         return await prisma.produto.create({
@@ -47,40 +46,44 @@ export default class ProdutoModel {
         });
     }
 
-
     async atualizar() {
         if (!this.id) {
-            throw new Error('ID_INVALIDO');
+            return { status: 400, error: 'ID inválido.' };
         }
 
         if (this.nome && this.nome.length < 3) {
-            throw new Error("Nome do produto deve ter no mínimo 3 caracteres");
+            return { status: 400, error: 'Nome do produto deve ter no mínimo 3 caracteres.' };
         }
 
         if (this.descricao && this.descricao.length > 255) {
-            throw new Error("Descrição deve ter no máximo 255 caracteres");
+            return { status: 400, error: 'Descrição deve ter no máximo 255 caracteres.' };
         }
 
         if (this.preco !== null && this.preco <= 0) {
-            throw new Error("Preço deve ser maior que 0.");
+            return { status: 400, error: 'Preço deve ser maior que 0.' };
         }
 
-         if (this.preco !== null && !/^\d+(\.\d{1,2})?$/.test(this.preco.toString())) {
-             throw new Error('Preço deve ter no máximo 2 casas decimais.');
+        if (this.preco !== null && !/^\d+(\.\d{1,2})?$/.test(this.preco.toString())) {
+            return { status: 400, error: 'Preço deve ter no máximo 2 casas decimais.' };
         }
 
         const data = {};
         if (this.nome !== null) data.nome = this.nome;
         if (this.descricao !== null) data.descricao = this.descricao;
         if (this.categoria !== null) data.categoria = this.categoria;
-        if (this.preco !== null) data.preco = this.preco;
-        if (this.disponivel !== null) data.disponivel = this.disponivel;
+        if (this.preco !== null) {
+            this.preco = parseFloat(this.preco);
+            data.preco = this.preco;
+        }
+        if (this.disponivel !== null) {
+            this.disponivel = typeof this.disponivel === 'string' ? this.disponivel === 'true' : Boolean(this.disponivel);
+            data.disponivel = this.disponivel;
+        }
 
         return await prisma.produto.update({
             where: { id: this.id },
-            data
+            data,
         });
-
     }
 
     async deletar() {
@@ -89,7 +92,11 @@ export default class ProdutoModel {
             where: { produtoId: this.id, pedido: { status: 'ABERTO' } },
         });
 
-        if (itemEmPedidoAberto) throw new Error('PRODUTO_VINCULADO');
+        if (itemEmPedidoAberto)
+            return {
+                status: 400,
+                error: 'Não é possível deletar produto vinculado a pedido em aberto.',
+            };
 
         return await prisma.produto.delete({ where: { id: this.id } });
     }
@@ -103,13 +110,11 @@ export default class ProdutoModel {
         }
 
         if (filtros.precoMin) {
-            where.preco = { gte: parseFloat
-            (filtros.precoMin) };
+            where.preco = { gte: parseFloat(filtros.precoMin) };
         }
 
         if (filtros.precoMax) {
-            where.preco = { ...where.preco, lte:
-            parseFloat(filtros.precoMax) };
+            where.preco = { ...where.preco, lte: parseFloat(filtros.precoMax) };
         }
 
         const results = await prisma.produto.findMany({ where });
