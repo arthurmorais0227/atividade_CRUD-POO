@@ -1,4 +1,8 @@
 import clienteModel from '../models/clienteModel.js';
+<<<<<<< fernando-v10
+import { obterClima } from '../utils/clima.js';
+=======
+>>>>>>> main
 import { buscarEnderecoPorCep } from '../utils/cep.js';
 
 export const criar = async (req, res) => {
@@ -161,5 +165,55 @@ export const deletar = async (req, res) => {
     } catch (error) {
         console.error('Erro ao deletar:', error);
         return res.status(500).json({ error: 'Erro ao deletar registro.' });
+    }
+};
+
+export const obterClimaCliente = async (req, res) => {
+    try {
+        const { id } = req.params;
+
+        if (isNaN(id)) {
+            return res.status(400).json({ error: 'O ID enviado não é um número válido.' });
+        }
+
+        const cliente = await clienteModel.buscarPorId(parseInt(id));
+
+        if (!cliente) {
+            return res.status(404).json({ error: 'Registro não encontrado.' });
+        }
+
+        if (!cliente.cep) {
+            return res.status(400).json({ error: 'Cliente não possui CEP cadastrado.' });
+        }
+        
+        let clima = null;
+        try {
+            clima = await obterClima(cliente.cep);
+        } catch (err) {
+
+            if (err.message === 'CEP_INVALIDO') {
+                return res.status(400).json({ error: 'CEP inválido.' });
+            }
+            clima = null;
+        }
+
+        const resposta = {
+            cliente_id: cliente.id,
+            cliente_nome: cliente.nome,
+            clima: clima
+                ? {
+                      temperatura: clima.temperatura,
+                      chove: clima.chove,
+                      quente: clima.quente,
+                      sugestao: clima.sugestao,
+                      cidade: clima.cidade,
+                      descricao: clima.descricao,
+                  }
+                : null,
+        };
+        return res.status(200).json({ data: resposta });
+    } catch (error) {
+        console.error('Erro ao obter clima:', error);
+        res.status(500).json({ error: 'Erro ao obter clima do cliente.' });
     }
 };
