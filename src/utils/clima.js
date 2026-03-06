@@ -1,3 +1,4 @@
+<<<<<<< fernando-v10
 import { buscarCidadePorCep } from './cep.js';
 
 const buscarCoordenadas = async (cidade) => {
@@ -104,3 +105,6 @@ export const obterClima = async (cep) => {
         descricao,
     };
 };
+=======
+
+>>>>>>> main

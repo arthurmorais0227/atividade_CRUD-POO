@@ -13,7 +13,10 @@ export const buscarEnderecoPorCep = async (cep) => {
                 };
             }
         }
+<<<<<<< fernando-v10
 
+=======
+>>>>>>> main
         response = await fetch(`https://brasilapi.com.br/api/cep/v1/${cep}`);
 
         if (response.ok) {
@@ -32,8 +35,12 @@ export const buscarEnderecoPorCep = async (cep) => {
     }
 };
 
+<<<<<<< fernando-v10
 export const buscarCidadePorCep = async (cep) => {
     const endereco = await buscarEnderecoPorCep(cep);
     if (!endereco) return null;
     return endereco.localidade || endereco.city || null;
 };
+=======
+
+>>>>>>> main

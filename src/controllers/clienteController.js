@@ -1,5 +1,8 @@
 import clienteModel from '../models/clienteModel.js';
+<<<<<<< fernando-v10
 import { obterClima } from '../utils/clima.js';
+=======
+>>>>>>> main
 import { buscarEnderecoPorCep } from '../utils/cep.js';
 
 export const criar = async (req, res) => {
@@ -36,11 +39,8 @@ export const criar = async (req, res) => {
 
         const data = await cliente.criar();
 
-        // o model retorna um objeto de erro nos casos de validação/uniqueness
-        // (por exemplo e-mail já cadastrado). se isso acontecer precisamos
-        // repassar o código apropriado em vez de sempre responder 201.
         if (data && data.error) {
-            // o próprio método define o status que deve ser usado
+            
             return res.status(data.status || 400).json({ error: data.error });
         }
 
