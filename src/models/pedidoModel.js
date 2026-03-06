@@ -1,11 +1,11 @@
-import prisma from "../utils/prismaClient.js";
+import prisma from '../utils/prismaClient.js';
 
 export default class PedidoModel {
     constructor({
         id = null,
         clienteId = null,
         total = 0,
-        status = "ABERTO",
+        status = 'ABERTO',
         criadoEm = null,
         itens = [],
     } = {}) {
@@ -18,13 +18,19 @@ export default class PedidoModel {
     }
 
     async criar() {
-
-        this.status = "ABERTO";
+        this.status = 'ABERTO';
 
         const totalCalculado = this.itens.reduce((acc, item) => {
-            return acc + (Number(item.quantidade) * Number(item.precoUnitario));
+            return acc + Number(item.quantidade) * Number(item.precoUnitario);
         }, 0);
 
+         if (clienteId.status === false) {
+             return {
+                 status: 404,
+                 error: 'Não é possível criar o pedido de um cliente inativo',
+             };
+        }
+        
         return prisma.pedido.create({
             data: {
                 clienteId: this.clienteId,
@@ -41,7 +47,10 @@ export default class PedidoModel {
             include: {
                 itens: true,
             },
-        });
+
+    });
+
+
     }
 
     async atualizar() {
@@ -50,26 +59,30 @@ export default class PedidoModel {
         });
 
         if (!pedidoAtual) {
-            return { status: 404, error: "Pedido não encontrado." };
+            return { status: 404, error: 'Pedido não encontrado.' };
         }
 
-        if (pedidoAtual.status === "PAGO" || pedidoAtual.status === "CANCELADO") {
+        if (pedidoAtual.status === 'PAGO' || pedidoAtual.status === 'CANCELADO') {
             return {
                 status: 400,
                 error: `Não é possível alterar um pedido com status ${pedidoAtual.status}.`,
             };
         }
 
-        if (this.status === "CANCELADO" && pedidoAtual.status !== "ABERTO") {
+        if (this.status === 'CANCELADO' && pedidoAtual.status !== 'ABERTO') {
             return {
                 status: 400,
-                error: "Só é possível cancelar pedidos que ainda estão ABERTOS.",
+                error: 'Só é possível cancelar pedidos que ainda estão ABERTOS.',
             };
         }
 
-        const totalCalculado = this.itens.length > 0
-            ? this.itens.reduce((acc, item) => acc + (Number(item.quantidade) * Number(item.precoUnitario)), 0)
-            : pedidoAtual.total;
+        const totalCalculado =
+            this.itens.length > 0
+                ? this.itens.reduce(
+                      (acc, item) => acc + Number(item.quantidade) * Number(item.precoUnitario),
+                      0,
+                  )
+                : pedidoAtual.total;
 
         const atualizado = await prisma.pedido.update({
             where: { id: this.id },
@@ -81,17 +94,23 @@ export default class PedidoModel {
 
         return {
             status: 200,
-            message: "Pedido atualizado com sucesso.",
+            message: 'Pedido atualizado com sucesso.',
             data: atualizado,
         };
     }
 
     async deletar() {
-
-        if (this.status === "PAGO") {
+        if (this.status !== 'ABERTO') {
             return {
                 status: 400,
-                error: "Não é possível deletar um pedido que já foi PAGO.",
+                error: 'Só é possível cancelar um pedido ABERTO',
+            };
+        }
+
+        if (this.status === 'PAGO') {
+            return {
+                status: 400,
+                error: 'Não é possível deletar um pedido que já foi PAGO.',
             };
         }
 
