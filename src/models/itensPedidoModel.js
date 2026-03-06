@@ -24,8 +24,8 @@ export default class ItemPedidoModel {
             throw new Error('O campo produtoId é obrigatório.');
         }
 
-        if (!this.quantidade || this.quantidade <= 0) {
-            throw new Error('Quantidade deve ser maior que 0.');
+        if (!this.quantidade || this.quantidade <= 0 || this.quantidade > 99) {
+            throw new Error('Quantidade deve ser maior que 0 e no máximo 99.');
         }
 
         const produto = await prisma.produto.findUnique({
@@ -34,6 +34,10 @@ export default class ItemPedidoModel {
 
         if (!produto) {
             throw new Error('Produto não encontrado.');
+        }
+
+        if (!produto.disponivel) {
+            throw new Error('Não é possível adicionar produto indisponível.');
         }
 
         this.precoUnitario = produto.preco;
@@ -76,11 +80,31 @@ export default class ItemPedidoModel {
             };
         }
 
-        if (this.quantidade !== undefined && this.quantidade <= 0) {
+        if (this.quantidade !== undefined && (this.quantidade <= 0 || this.quantidade > 99)) {
             return {
                 status: 400,
-                error: 'Quantidade deve ser maior que 0.',
+                error: 'Quantidade deve ser maior que 0 e no máximo 99.',
             };
+        }
+
+        let novoPrecoUnitario = existente.precoUnitario;
+        if (this.produtoId && this.produtoId !== existente.produtoId) {
+            const novoProduto = await prisma.produto.findUnique({
+                where: { id: this.produtoId },
+            });
+            if (!novoProduto) {
+                return {
+                    status: 400,
+                    error: 'Novo produto não encontrado.',
+                };
+            }
+            if (!novoProduto.disponivel) {
+                return {
+                    status: 400,
+                    error: 'Não é possível alterar para produto indisponível.',
+                };
+            }
+            novoPrecoUnitario = novoProduto.preco;
         }
 
         const atualizado = await prisma.itemPedido.update({
@@ -88,6 +112,7 @@ export default class ItemPedidoModel {
             data: {
                 produtoId: this.produtoId ?? existente.produtoId,
                 quantidade: this.quantidade ?? existente.quantidade,
+                precoUnitario: novoPrecoUnitario,
             },
             include: {
                 produto: true,
@@ -117,10 +142,10 @@ export default class ItemPedidoModel {
             };
         }
 
-        if (existente.pedido.status === 'PAGO') {
+        if (existente.pedido.status === 'PAGO' || existente.pedido.status === 'CANCELADO') {
             return {
                 status: 400,
-                error: 'Não é possível deletar item de pedido PAGO.',
+                error: 'Não é possível deletar item de pedido finalizado.',
             };
         }
 
