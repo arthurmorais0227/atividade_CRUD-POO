@@ -1,8 +1,5 @@
 import clienteModel from '../models/clienteModel.js';
-<<<<<<< fernando-v10
 import { obterClima } from '../utils/clima.js';
-=======
->>>>>>> main
 import { buscarEnderecoPorCep } from '../utils/cep.js';
 
 export const criar = async (req, res) => {
@@ -40,7 +37,7 @@ export const criar = async (req, res) => {
         const data = await cliente.criar();
 
         if (data && data.error) {
-            
+
             return res.status(data.status || 400).json({ error: data.error });
         }
 
@@ -185,7 +182,7 @@ export const obterClimaCliente = async (req, res) => {
         if (!cliente.cep) {
             return res.status(400).json({ error: 'Cliente não possui CEP cadastrado.' });
         }
-        
+
         let clima = null;
         try {
             clima = await obterClima(cliente.cep);
