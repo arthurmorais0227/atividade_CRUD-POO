@@ -24,13 +24,24 @@ export default class PedidoModel {
             return acc + Number(item.quantidade) * Number(item.precoUnitario);
         }, 0);
 
-         if (clienteId.status === false) {
-             return {
-                 status: 404,
-                 error: 'Não é possível criar o pedido de um cliente inativo',
-             };
+        const cliente = await prisma.cliente.findUnique({
+            where: { id: this.clienteId },
+        });
+
+        if (!cliente) {
+            return {
+                status: 404,
+                error: 'Cliente não encontrado.',
+            };
         }
-        
+
+        if (cliente.ativo === false) {
+            return {
+                status: 400,
+                error: 'Não é possível criar o pedido de um cliente inativo',
+            };
+        }
+
         return prisma.pedido.create({
             data: {
                 clienteId: this.clienteId,
@@ -47,10 +58,7 @@ export default class PedidoModel {
             include: {
                 itens: true,
             },
-
-    });
-
-
+        });
     }
 
     async atualizar() {
