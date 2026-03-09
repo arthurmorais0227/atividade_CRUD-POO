@@ -19,6 +19,13 @@ export default class ProdutoModel {
     }
 
     async criar() {
+        // REGRA DE NEGÓCIO:Não pode adicionar produto com disponivel = false ao pedido
+       if (!produto.disponivel) {
+           return {
+               status: 400,
+               error: 'Não é possível adicionar produto indisponível',
+           };
+       }
         // REGRA DE NEGÓCIO: Nome obrigatório e mínimo 3 caracteres
         if (!this.nome || this.nome.length < 3) {
             return { status: 400, error: 'Nome do produto deve ter no mínimo 3 caracteres.' };
@@ -37,6 +44,8 @@ export default class ProdutoModel {
         if (!/^\d+(\.\d{1,2})?$/.test(this.preco.toString())) {
             return { status: 400, error: 'Preço deve ter no máximo 2 casas decimais.' };
         }
+
+
 
         return await prisma.produto.create({
             data: {

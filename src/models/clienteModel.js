@@ -95,6 +95,7 @@ export default class ClienteModel {
     }
 
     async atualizar() {
+        // REGRA DE NEGÓCIO:Email unico
         const emailExistente = await prisma.cliente.findFirst({
             where: { email: this.email },
         });
@@ -102,11 +103,11 @@ export default class ClienteModel {
         if (emailExistente && emailExistente.id !== this.id) {
             return { status: 409, error: 'Email já cadastrado.' };
         }
-
+        // REGRA DE NEGÓCIO: CPF com 11 digitos
         if (!/^\d{11}$/.test(this.cpf)) {
             return { status: 400, error: 'CPF deve conter 11 dígitos numéricos.' };
         }
-
+        // REGRA DE NEGÓCIO:CPF unico
         const cpfExistente = await prisma.cliente.findFirst({
             where: { cpf: this.cpf },
         });
@@ -115,7 +116,6 @@ export default class ClienteModel {
             return { status: 409, error: 'CPF já cadastrado.' };
         }
 
-        this.cep = this.cep.replace('-', '');
         if (!/^\d{8}$/.test(this.cep)) {
             return { status: 400, error: 'CEP deve conter 8 dígitos numéricos.' };
         }
@@ -157,6 +157,7 @@ export default class ClienteModel {
     }
 
     async deletar() {
+        // REGRA DE NEGÓCIO: Não pode deletar cliente com pedido em status ABERTO
         const pedidoAberto = await prisma.pedido.findFirst({
             where: {
                 clienteId: this.id,
@@ -189,49 +190,50 @@ export default class ClienteModel {
         return { status: 200 };
     }
 
-    static async buscarTodos(filtros = {}) {
-        const where = {};
+  static async buscarTodos(filtros = {}) {
+    const where = {};
 
-        if (filtros.nome) where.nome = { contains: filtros.nome, mode: 'insensitive' };
+    if (filtros.nome)
+      where.nome = { contains: filtros.nome, mode: "insensitive" };
 
-        if (filtros.cpf !== undefined) where.cpf = { contains: filtros.cpf };
+    if (filtros.cpf !== undefined) where.cpf = { contains: filtros.cpf };
 
-        if (filtros.ativo !== undefined) {
-            where.ativo = filtros.ativo === 'true' || filtros.ativo === true;
-        }
-
-        //sou eu que to escrevendo thiago/marcelo, 28/02 09:23  - só pra exibir os pedidos de cada cliente
-        // agora traz também os itens de cada pedido
-        const results = await prisma.cliente.findMany({
-            where,
-            orderBy: {
-                id: 'asc', // ordem crescente
-            },
-            include: {
-                pedidos: { include: { itens: { include: { produto: true } } } },
-            },
-        });
-
-        return results.map(
-            (data) =>
-                new ClienteModel({
-                    ...data,
-                    pedidos: data.pedidos.map((p) => new PedidoModel(p)),
-                }),
-        );
+    if (filtros.ativo !== undefined) {
+      where.ativo = filtros.ativo === "true" || filtros.ativo === true;
     }
 
-    static async buscarPorId(id) {
-        const data = await prisma.cliente.findUnique({
-            where: { id },
-            include: {
-                pedidos: { include: { itens: { include: { produto: true } } } },
-            },
-        });
-        if (!data) return null;
-        return new ClienteModel({
-            ...data,
-            pedidos: data.pedidos.map((p) => new PedidoModel(p)),
-        });
-    }
+    //sou eu que to escrevendo thiago/marcelo, 28/02 09:23  - só pra exibir os pedidos de cada cliente
+    // agora traz também os itens de cada pedido
+    const results = await prisma.cliente.findMany({
+      where,
+      orderBy: {
+        id: "asc", // ordem crescente
+      },
+      include: {
+        pedidos: { include: { itens: { include: { produto: true } } } },
+      },
+    });
+
+    return results.map(
+      (data) =>
+        new ClienteModel({
+          ...data,
+          pedidos: data.pedidos.map((p) => new PedidoModel(p)),
+        }),
+    );
+  }
+
+  static async buscarPorId(id) {
+    const data = await prisma.cliente.findUnique({
+      where: { id },
+      include: {
+        pedidos: { include: { itens: { include: { produto: true } } } },
+      },
+    });
+    if (!data) return null;
+    return new ClienteModel({
+      ...data,
+      pedidos: data.pedidos.map((p) => new PedidoModel(p)),
+    });
+  }
 }
