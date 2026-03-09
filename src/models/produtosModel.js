@@ -23,7 +23,7 @@ export default class ProdutoModel {
        if (!produto.disponivel) {
            return {
                status: 400,
-               error: 'Não é possível adicionar produto indisponível.',
+               error: 'Não é possível adicionar produto indisponível',
            };
        }
         // REGRA DE NEGÓCIO: Nome obrigatório e mínimo 3 caracteres
