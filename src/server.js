@@ -4,6 +4,7 @@ import clienteRoutes from './routes/clienteRoute.js';
 import pedidoRoutes from './routes/pedidoRoute.js';
 import itensPedidoRoutes from './routes/itensPedidoRoute.js';
 import produtoRoutes from './routes/produtosRoute.js';
+import autenticarApiKey from '../src/utils/apiKey.js';
 
 const app = express();
 app.use(express.json());
@@ -15,7 +16,7 @@ app.get('/', (req, res) => {
 });
 
 // Rotas
-app.use('/api', clienteRoutes);
+app.use('/api', autenticarApiKey, clienteRoutes);
 app.use('/api', pedidoRoutes);
 app.use('/api', itensPedidoRoutes);
 app.use('/api', produtoRoutes)
