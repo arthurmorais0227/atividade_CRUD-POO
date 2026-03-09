@@ -76,7 +76,12 @@ export const obterClima = async (cep) => {
         throw new Error('CEP_INVALIDO');
     }
 
-    const cidade = await buscarCidadePorCep(cep);
+    let cidade;
+    try {
+        cidade = await buscarCidadePorCep(cep);
+    } catch (error) {
+        return null;
+    }
     if (!cidade) {
         return null;
     }

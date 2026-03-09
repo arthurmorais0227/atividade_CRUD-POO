@@ -1,5 +1,5 @@
-import prisma from "../utils/prismaClient.js";
-import PedidoModel from "./pedidoModel.js";
+import prisma from '../utils/prismaClient.js';
+import PedidoModel from './pedidoModel.js';
 
 export default class ClienteModel {
   constructor({

@@ -45,6 +45,8 @@ export default class ProdutoModel {
             return { status: 400, error: 'Preço deve ter no máximo 2 casas decimais.' };
         }
 
+
+
         return await prisma.produto.create({
             data: {
                 nome: this.nome,
