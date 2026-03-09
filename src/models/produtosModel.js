@@ -19,6 +19,14 @@ export default class ProdutoModel {
     }
 
     async criar() {
+        // REGRA DE NEGÓCIO:Não pode criar pedido para cliente com ativo = false
+        const produto = await prisma.produto.findUnique({ where: { id: produtoId } });
+        if (!produto) {
+            return { status: 404, error: 'Produto não encontrado.' };
+        }
+        if (!produto.disponivel) {
+            return { status: 400, error: 'Não é possível adicionar produto indisponível.' };
+        }
         // REGRA DE NEGÓCIO: Nome obrigatório e mínimo 3 caracteres
         if (!this.nome || this.nome.length < 3) {
             return { status: 400, error: 'Nome do produto deve ter no mínimo 3 caracteres.' };
