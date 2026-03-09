@@ -19,10 +19,13 @@ export default class ProdutoModel {
     }
 
     async criar() {
-        // REGRA DE NEGÓCIO:Não pode criar pedido para cliente com ativo = false
-        if (disponivel = false) {
-            return { status: 400, error: 'Não é possível adicionar produto indisponível.' };
-        }
+        // REGRA DE NEGÓCIO:Não pode adicionar produto com disponivel = false ao pedido
+       if (!produto.disponivel) {
+           return {
+               status: 400,
+               error: 'Não é possível adicionar produto indisponível.',
+           };
+       }
         // REGRA DE NEGÓCIO: Nome obrigatório e mínimo 3 caracteres
         if (!this.nome || this.nome.length < 3) {
             return { status: 400, error: 'Nome do produto deve ter no mínimo 3 caracteres.' };
