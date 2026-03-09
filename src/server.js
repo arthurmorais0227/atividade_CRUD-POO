@@ -19,7 +19,7 @@ app.get('/', (req, res) => {
 app.use('/api', autenticarApiKey, clienteRoutes);
 app.use('/api', pedidoRoutes);
 app.use('/api', itensPedidoRoutes);
-app.use('/api', produtoRoutes)
+app.use('/api', produtoRoutes);
 
 app.use((req, res) => {
     res.status(404).json({ error: 'Rota não encontrada' });
