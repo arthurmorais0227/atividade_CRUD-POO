@@ -60,6 +60,7 @@ export default class ClienteModel {
         }
 
         //eu que to escrevendo thiago/marcelo, 27/02 21:00 - validação cep 8 numeros
+        this.cep = this.cep.replace('-', '');
         if (!/^\d{8}$/.test(this.cep)) {
             return { status: 400, error: 'CEP deve conter 8 dígitos numéricos.' };
         }
@@ -110,6 +111,7 @@ export default class ClienteModel {
             return { status: 409, error: 'CPF já cadastrado.' };
         }
 
+        this.cep = this.cep.replace('-', '');
         if (!/^\d{8}$/.test(this.cep)) {
             return { status: 400, error: 'CEP deve conter 8 dígitos numéricos.' };
         }

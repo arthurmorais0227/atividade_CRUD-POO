@@ -1,5 +1,4 @@
 import pedidoModel from '../models/pedidoModel.js';
-import prisma from '../utils/prismaClient.js';
 
 export const criar = async (req, res) => {
     try {
@@ -198,16 +197,7 @@ export const adicionarItem = async (req, res) => {
         if (quantidade === undefined)
             return res.status(400).json({ error: 'O campo "quantidade" é obrigatório!' });
 
-        // regra de negócio: não adicionar produto indisponível
-        const produto = await prisma.produto.findUnique({ where: { id: produtoId } });
-        if (!produto) {
-            return res.status(404).json({ error: 'Produto não encontrado.' });
-        }
-        if (!produto.disponivel) {
-            return res
-                .status(400)
-                .json({ error: 'Não é possível adicionar produto indisponível.' });
-        }
+        // regra de negócio: não adicionar produto indisponível (checa pelo model)
 
         const ItemPedidoModel = (await import('../models/itensPedidoModel.js')).default;
         const item = new ItemPedidoModel({
@@ -217,13 +207,6 @@ export const adicionarItem = async (req, res) => {
         });
 
         const criado = await item.criar();
-
-        const novoTotal = Number(pedido.total) + Number(criado.precoUnitario) * criado.quantidade;
-        await prisma.pedido.update({
-            where: { id: pedido.id },
-            data: { total: novoTotal },
-        });
-
         return res.status(201).json({ message: 'Item adicionado com sucesso!', data: criado });
     } catch (error) {
         console.error('Erro ao adicionar item:', error);
@@ -263,13 +246,6 @@ export const removerItem = async (req, res) => {
         if (resultado.error) {
             return res.status(resultado.status).json({ error: resultado.error });
         }
-
-        const valorRemovido = Number(item.precoUnitario) * item.quantidade;
-        const novoTotal = Number(pedido.total) - valorRemovido;
-        await prisma.pedido.update({
-            where: { id: pedido.id },
-            data: { total: novoTotal },
-        });
 
         return res.status(200).json({ message: 'Item removido com sucesso!' });
     } catch (error) {
