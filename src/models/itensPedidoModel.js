@@ -35,7 +35,7 @@ export default class ItemPedidoModel {
         if (!produto) {
             throw new Error('Produto não encontrado.');
         }
-
+        // REGRA DE NEGÓCIO: Não pode adicionar produto com disponivel = false
         if (!produto.disponivel) {
             throw new Error('Não é possível adicionar produto indisponível.');
         }
@@ -72,14 +72,14 @@ export default class ItemPedidoModel {
                 error: 'ItemPedido não encontrado.',
             };
         }
-
+        //REGRA DE NEGÓCIO: Não pode alterar item de pedido PAGO ou CANCELADO
         if (existente.pedido.status === 'PAGO' || existente.pedido.status === 'CANCELADO') {
             return {
                 status: 400,
                 error: 'Não é possível alterar item de pedido finalizado.',
             };
         }
-
+        //REGRA DE NEGÓCIO: Quantidade maior que 0 e no máximo 99
         if (this.quantidade !== undefined && (this.quantidade <= 0 || this.quantidade > 99)) {
             return {
                 status: 400,
@@ -104,6 +104,7 @@ export default class ItemPedidoModel {
                     error: 'Não é possível alterar para produto indisponível.',
                 };
             }
+            //REGRA DE NEGÓCIO: precoUnitario deve armazenar o preço do produto no momento da inserção
             novoPrecoUnitario = novoProduto.preco;
         }
 
@@ -141,7 +142,7 @@ export default class ItemPedidoModel {
                 error: 'ItemPedido não encontrado.',
             };
         }
-
+        //REGRA DE NEGÓCIO: Não pode remover item de pedido PAGO ou CANCELADO
         if (existente.pedido.status === 'PAGO' || existente.pedido.status === 'CANCELADO') {
             return {
                 status: 400,

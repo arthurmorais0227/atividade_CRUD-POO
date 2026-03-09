@@ -19,10 +19,12 @@ export default class ProdutoModel {
     }
 
     async criar() {
+        // REGRA DE NEGÓCIO: Nome obrigatório e mínimo 3 caracteres
         if (!this.nome || this.nome.length < 3) {
             return { status: 400, error: 'Nome do produto deve ter no mínimo 3 caracteres.' };
         }
 
+        // REGRA DE NEGÓCIO: Descrição máximo 255 caracteres
         if (this.descricao && this.descricao.length > 255) {
             return { status: 400, error: 'Descrição deve ter no máximo 255 caracteres.' };
         }
@@ -31,6 +33,7 @@ export default class ProdutoModel {
             return { status: 400, error: 'Preço deve ser maior que 0.' };
         }
 
+        // REGRA DE NEGÓCIO: Preço obrigatório, maior que 0 e no máximo 2 casas decimais
         if (!/^\d+(\.\d{1,2})?$/.test(this.preco.toString())) {
             return { status: 400, error: 'Preço deve ter no máximo 2 casas decimais.' };
         }
@@ -103,6 +106,7 @@ export default class ProdutoModel {
             where: { produtoId: this.id, pedido: { status: 'ABERTO' } },
         });
 
+        // REGRA DE NEGÓCIO: Não pode deletar produto vinculado a pedido ABERTO
         if (itemEmPedidoAberto)
             return {
                 status: 400,
