@@ -3,21 +3,23 @@ import ProdutoModel from "../models/produtosModel.js";
 export const criar = async (req, res) => {
     try {
         if (!req.body || Object.keys(req.body).length === 0) {
-            return res.status(400).json({ error: "Corpo de requisição vazio"});
+            return res.status(400).json({ error: 'Corpo de requisição vazio' });
         }
 
         const { nome, descricao, categoria, preco, disponivel } = req.body;
 
-        if (!nome) return res.status(400).json({ error: 'O campo "nome" é obrigatório'});
-        if (!categoria) return res.status(400).json({ error: 'O campo "categoria" é obrigatório'});
-        if (preco === undefined) return res.status(400).json({ error: 'O campo "preço" é obrigatório'});
+        
+        if (!nome) return res.status(400).json({ error: 'O campo "nome" é obrigatório' });
+        if (!categoria) return res.status(400).json({ error: 'O campo "categoria" é obrigatório' });
+        if (preco === undefined)
+            return res.status(400).json({ error: 'O campo "preço" é obrigatório' });
 
-        const produto = new ProdutoModel ({ nome, descricao, categoria, preco, disponivel});
+        const produto = new ProdutoModel({ nome, descricao, categoria, preco, disponivel });
         const resultado = await produto.criar();
 
-        if (resultado.error) return res.status(resultado.status).json({ error: resultado.error});
+        if (resultado.error) return res.status(resultado.status).json({ error: resultado.error });
 
-        res.status(201).json({ message: "Produto criado com sucesso!", data: resultado});
+        res.status(201).json({ message: 'Produto criado com sucesso!', data: resultado });
     } catch (error) {
         res.status(500).json({ error: "Erro interno ao salvar o produto."})
     }

@@ -31,6 +31,11 @@ export default class ClienteModel {
     }
 
     async criar() {
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if (!emailRegex.test(this.email)) {
+            return { status: 400, error: 'Formato de e-mail inválido.' };
+        }
+
         //não pede de email mas o erro ta me enchendo o saco então vou criar
         const emailExistente = await prisma.cliente.findFirst({
             where: { email: this.email },
