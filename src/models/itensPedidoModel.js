@@ -54,6 +54,15 @@ export default class ItemPedidoModel {
                 pedido: true,
             },
         });
+        // atualiza total do pedido automaticamente
+        await prisma.pedido.update({
+            where: { id: this.pedidoId },
+            data: {
+                total: {
+                    increment: Number(criado.precoUnitario) * criado.quantidade,
+                },
+            },
+        });
 
         return criado;
     }
@@ -151,6 +160,16 @@ export default class ItemPedidoModel {
 
         await prisma.itemPedido.delete({
             where: { id: this.id },
+        });
+        
+        const valorRemovido = Number(existente.precoUnitario) * existente.quantidade;
+        await prisma.pedido.update({
+            where: { id: existente.pedidoId },
+            data: {
+                total: {
+                    decrement: valorRemovido,
+                },
+            },
         });
 
         return {
