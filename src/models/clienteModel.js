@@ -74,6 +74,10 @@ export default class ClienteModel {
             return { status: 409, error: 'Telefone já cadastrado.' };
         }
 
+        if (this.telefone.length < 10 || this.telefone.length > 11) {
+            return { status: 400, error: 'O telefone deve ter 10 ou 11 dígitos.' };
+        }
+
         return prisma.cliente.create({
             data: {
                 nome: this.nome,
@@ -114,6 +118,11 @@ export default class ClienteModel {
         this.cep = this.cep.replace('-', '');
         if (!/^\d{8}$/.test(this.cep)) {
             return { status: 400, error: 'CEP deve conter 8 dígitos numéricos.' };
+        }
+
+        this.telefone = this.telefone?.replace(/\D/g, '');
+        if (!/^\d{10,11}$/.test(this.telefone)) {
+            return { status: 400, error: 'Telefone deve conter 10 ou 11 dígitos numéricos.' };
         }
 
         const telefoneExistente = await prisma.cliente.findFirst({
