@@ -16,10 +16,11 @@ export const criar = async (req, res) => {
         if (!cpf) return res.status(400).json({ error: 'O campo "cpf" é obrigatório!' });
         if (!cep) return res.status(400).json({ error: 'O campo "cep" é obrigatório!' });
 
-        const endereco = await buscarEnderecoPorCep(cep);
-
-        if (!endereco) {
-            return res.status(400).json({ error: 'CEP deve ter 8 dígitos numéricos!' });
+        let endereco;
+        try {
+            endereco = await buscarEnderecoPorCep(cep);
+        } catch (error) {
+            return res.status(400).json({ error: error.message });
         }
 
         const cliente = new clienteModel({
@@ -27,7 +28,7 @@ export const criar = async (req, res) => {
             telefone,
             email,
             cpf,
-            cep: String(cep),
+            cep: cep.replace('-', ''),
             logradouro: endereco.logradouro || null,
             bairro: endereco.bairro || null,
             localidade: endereco.localidade || null,
@@ -37,7 +38,6 @@ export const criar = async (req, res) => {
         const data = await cliente.criar();
 
         if (data && data.error) {
-
             return res.status(data.status || 400).json({ error: data.error });
         }
 
@@ -104,13 +104,14 @@ export const atualizar = async (req, res) => {
         const { cep } = req.body;
 
         if (cep) {
-            const endereco = await buscarEnderecoPorCep(cep);
-
-            if (!endereco) {
-                return res.status(400).json({ error: 'CEP inválido.' });
+            let endereco;
+            try {
+                endereco = await buscarEnderecoPorCep(cep);
+            } catch (error) {
+                return res.status(400).json({ error: error.message });
             }
 
-            req.body.cep = String(cep);
+            req.body.cep = cep.replace('-', '');
             req.body.logradouro = endereco.logradouro || null;
             req.body.bairro = endereco.bairro || null;
             req.body.localidade = endereco.localidade || null;
@@ -187,7 +188,6 @@ export const obterClimaCliente = async (req, res) => {
         try {
             clima = await obterClima(cliente.cep);
         } catch (err) {
-
             if (err.message === 'CEP_INVALIDO') {
                 return res.status(400).json({ error: 'CEP inválido.' });
             }
