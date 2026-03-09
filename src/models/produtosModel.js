@@ -67,6 +67,14 @@ export default class ProdutoModel {
             return { status: 400, error: 'Preço deve ter no máximo 2 casas decimais.' };
         }
 
+        const produto = await prisma.produto.findUnique({ where: { id: produtoId } });
+        if (!produto) {
+            return { status: 404, error: 'Produto não encontrado.' };
+        }
+        if (!produto.disponivel) {
+            return { status: 400, error: 'Não é possível adicionar produto indisponível.' };
+        }
+
         const data = {};
         if (this.nome !== null) data.nome = this.nome;
         if (this.descricao !== null) data.descricao = this.descricao;
@@ -76,7 +84,10 @@ export default class ProdutoModel {
             data.preco = this.preco;
         }
         if (this.disponivel !== null) {
-            this.disponivel = typeof this.disponivel === 'string' ? this.disponivel === 'true' : Boolean(this.disponivel);
+            this.disponivel =
+                typeof this.disponivel === 'string'
+                    ? this.disponivel === 'true'
+                    : Boolean(this.disponivel);
             data.disponivel = this.disponivel;
         }
 

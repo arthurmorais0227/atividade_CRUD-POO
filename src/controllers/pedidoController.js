@@ -198,6 +198,17 @@ export const adicionarItem = async (req, res) => {
         if (quantidade === undefined)
             return res.status(400).json({ error: 'O campo "quantidade" é obrigatório!' });
 
+        // regra de negócio: não adicionar produto indisponível
+        const produto = await prisma.produto.findUnique({ where: { id: produtoId } });
+        if (!produto) {
+            return res.status(404).json({ error: 'Produto não encontrado.' });
+        }
+        if (!produto.disponivel) {
+            return res
+                .status(400)
+                .json({ error: 'Não é possível adicionar produto indisponível.' });
+        }
+
         const ItemPedidoModel = (await import('../models/itensPedidoModel.js')).default;
         const item = new ItemPedidoModel({
             pedidoId: parseInt(id),
