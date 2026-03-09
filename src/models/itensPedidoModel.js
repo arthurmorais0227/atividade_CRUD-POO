@@ -162,7 +162,7 @@ export default class ItemPedidoModel {
         await prisma.itemPedido.delete({
             where: { id: this.id },
         });
-        
+
         const valorRemovido = Number(existente.precoUnitario) * existente.quantidade;
         await prisma.pedido.update({
             where: { id: existente.pedidoId },

@@ -1,101 +1,81 @@
-import itemPedidoModel from "../models/itensPedidoModel.js";
+import itemPedidoModel from '../models/itensPedidoModel.js';
 
 export const criar = async (req, res) => {
     try {
-
         if (!req.body) {
-            return res
-                .status(400)
-                .json({ error: "Corpo da requisição vazio. Envie os dados!" });
+            return res.status(400).json({ error: 'Corpo da requisição vazio. Envie os dados!' });
         }
 
-        const {
-            pedidoId,
-            produtoId,
-            quantidade
-        } = req.body;
+        const { pedidoId, produtoId, quantidade } = req.body;
 
         if (!pedidoId)
             return res.status(400).json({
-                error: 'O campo "pedidoId" é obrigatório!'
+                error: 'O campo "pedidoId" é obrigatório!',
             });
 
         if (!produtoId)
             return res.status(400).json({
-                error: 'O campo "produtoId" é obrigatório!'
+                error: 'O campo "produtoId" é obrigatório!',
             });
 
         if (quantidade === undefined)
             return res.status(400).json({
-                error: 'O campo "quantidade" é obrigatório!'
+                error: 'O campo "quantidade" é obrigatório!',
             });
 
         if (quantidade <= 0)
             return res.status(400).json({
-                error: "Quantidade deve ser maior que 0!"
+                error: 'Quantidade deve ser maior que 0!',
             });
 
         const item = new itemPedidoModel({
             pedidoId,
             produtoId,
-            quantidade
+            quantidade,
         });
 
         const data = await item.criar();
 
         res.status(201).json({
-            message: "Item criado com sucesso!",
-            data
+            message: 'Item criado com sucesso!',
+            data,
         });
-
     } catch (error) {
-
-        console.error("Erro ao criar item:", error);
+        console.error('Erro ao criar item:', error);
 
         res.status(500).json({
-            error: error.message || "Erro interno ao salvar o item."
+            error: error.message || 'Erro interno ao salvar o item.',
         });
-
     }
 };
 
-
 export const buscarTodos = async (req, res) => {
-
     try {
-
         const registros = await itemPedidoModel.buscarTodos(req.query);
 
         if (!registros || registros.length === 0) {
             return res.status(200).json({
-                message: "Nenhum item encontrado."
+                message: 'Nenhum item encontrado.',
             });
         }
 
         res.json(registros);
-
     } catch (error) {
-
-        console.error("Erro ao buscar itens:", error);
+        console.error('Erro ao buscar itens:', error);
 
         res.status(500).json({
-            error: "Erro ao buscar itens."
+            error: 'Erro ao buscar itens.',
         });
-
     }
-
 };
 
-
 export const buscarPorId = async (req, res) => {
-
     try {
-
         const { id } = req.params;
 
         if (isNaN(id)) {
             return res.status(400).json({
-                error: "O ID enviado não é um número válido."
+                error: 'O ID enviado não é um número válido.',
             });
         }
 
@@ -103,36 +83,29 @@ export const buscarPorId = async (req, res) => {
 
         if (!item) {
             return res.status(404).json({
-                error: "Item não encontrado."
+                error: 'Item não encontrado.',
             });
         }
 
         res.json({
-            data: item
+            data: item,
         });
-
     } catch (error) {
-
-        console.error("Erro ao buscar item:", error);
+        console.error('Erro ao buscar item:', error);
 
         res.status(500).json({
-            error: "Erro ao buscar item."
+            error: 'Erro ao buscar item.',
         });
-
     }
-
 };
 
-
 export const atualizar = async (req, res) => {
-
     try {
-
         const { id } = req.params;
 
         if (isNaN(id)) {
             return res.status(400).json({
-                error: "ID inválido."
+                error: 'ID inválido.',
             });
         }
 
@@ -140,7 +113,7 @@ export const atualizar = async (req, res) => {
 
         if (!item) {
             return res.status(404).json({
-                error: "Item não encontrado para atualizar."
+                error: 'Item não encontrado para atualizar.',
             });
         }
 
@@ -150,37 +123,30 @@ export const atualizar = async (req, res) => {
 
         if (resultado.error) {
             return res.status(resultado.status).json({
-                error: resultado.error
+                error: resultado.error,
             });
         }
 
         return res.status(200).json({
-            message: "Item atualizado com sucesso!",
-            data: resultado.data
+            message: 'Item atualizado com sucesso!',
+            data: resultado.data,
         });
-
     } catch (error) {
-
-        console.error("Erro ao atualizar item:", error);
+        console.error('Erro ao atualizar item:', error);
 
         return res.status(500).json({
-            error: "Erro ao atualizar item."
+            error: 'Erro ao atualizar item.',
         });
-
     }
-
 };
 
-
 export const deletar = async (req, res) => {
-
     try {
-
         const { id } = req.params;
 
         if (isNaN(id)) {
             return res.status(400).json({
-                error: "ID inválido."
+                error: 'ID inválido.',
             });
         }
 
@@ -188,7 +154,7 @@ export const deletar = async (req, res) => {
 
         if (!item) {
             return res.status(404).json({
-                error: "Item não encontrado para deletar."
+                error: 'Item não encontrado para deletar.',
             });
         }
 
@@ -196,23 +162,19 @@ export const deletar = async (req, res) => {
 
         if (resultado.error) {
             return res.status(resultado.status).json({
-                error: resultado.error
+                error: resultado.error,
             });
         }
 
         return res.status(200).json({
             message: `O item ID: "${id}" foi deletado com sucesso!`,
-            deletado: item
+            deletado: item,
         });
-
     } catch (error) {
-
-        console.error("Erro ao deletar item:", error);
+        console.error('Erro ao deletar item:', error);
 
         return res.status(500).json({
-            error: "Erro ao deletar item."
+            error: 'Erro ao deletar item.',
         });
-
     }
-
 };
