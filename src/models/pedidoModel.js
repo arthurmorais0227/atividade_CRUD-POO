@@ -18,7 +18,7 @@ export default class PedidoModel {
     }
 
     async criar() {
-        // regra de negocio - pedido inicia obrigatoriamente com status ABERTO
+        // REGRA DE NEGÓCIO: Pedido inicia obrigatoriamente com status ABERTO
         this.status = 'ABERTO';
 
         const totalCalculado = this.itens.reduce((acc, item) => {
@@ -35,7 +35,7 @@ export default class PedidoModel {
                 error: 'Cliente não encontrado.',
             };
         }
-        // regra de negocio - não pode criar pedido para cliente com ativo = false
+        // REGRA DE NEGÓCIO: Não pode criar pedido para cliente com ativo = false
         if (cliente.ativo === false) {
             return {
                 status: 400,
@@ -70,21 +70,21 @@ export default class PedidoModel {
         if (!pedidoAtual) {
             return { status: 404, error: 'Pedido não encontrado.' };
         }
-        //regra de negocio - não pode adicionar itens se o pedido estiver PAGO ou CANCELADO
+        //REGRA DE NEGÓCIO: Não pode adicionar itens se o pedido estiver PAGO ou CANCELADO
         if (pedidoAtual.status === 'PAGO' || pedidoAtual.status === 'CANCELADO') {
             return {
                 status: 400,
                 error: `Não é possível alterar um pedido com status PAGO ou CANCELADO.`,
             };
         }
-        // regra de negocio - só pode cancelar pedido se estiver ABERTO
+        // REGRA DE NEGÓCIO: Só pode cancelar pedido se estiver ABERTO
         if (this.status === 'CANCELADO' && pedidoAtual.status !== 'ABERTO') {
             return {
                 status: 400,
                 error: 'Só é possível cancelar pedidos que ainda estão ABERTOS.',
             };
         }
-        // regra de negocio - total calculado automaticamente com base nos itens
+        // REGRA DE NEGÓCIO: Total calculado automaticamente com base nos itens
         const totalCalculado =
             this.itens.length > 0
                 ? this.itens.reduce(
